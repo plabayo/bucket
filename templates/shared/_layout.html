@@ -1,12 +1,4 @@
-use std::path::PathBuf;
-
-use axum::{routing::get, Router, response::Html};
-use tower_http::services::ServeDir;
-
-async fn page_index() -> Html<&'static str>  {
-    // TODO: support template
-    Html(r#"
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -20,6 +12,8 @@ async fn page_index() -> Html<&'static str>  {
 
     <script src="/static/js/htmx.min.js?v=1.9.6"></script>
     <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
+
+    {% block additional_css %}{% endblock %}
 </head>
 
 <body hx-boost="true">
@@ -30,8 +24,7 @@ async fn page_index() -> Html<&'static str>  {
     </header>
 
     <main class="width:100% height:100%">
-        <h1>Hello World!</h1>
-        <p>This is not very much yet...</p>
+        {% block main_content %}{% endblock %}
     </main>
 
     <footer class="text-align:center">
@@ -40,14 +33,3 @@ async fn page_index() -> Html<&'static str>  {
 </body>
 
 </html>
-    "#)
-}
-
-#[shuttle_runtime::main]
-async fn axum() -> shuttle_axum::ShuttleAxum {
-    let router = Router::new()
-        .route("/", get(page_index))
-        .nest_service("/static", ServeDir::new(PathBuf::from("static")));
-
-    Ok(router.into())
-}
