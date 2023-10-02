@@ -1,11 +1,12 @@
 use std::path::PathBuf;
 
-use axum::{routing::get, Router, response::Html};
+use axum::{response::Html, routing::get, Router};
 use tower_http::services::ServeDir;
 
-async fn page_index() -> Html<&'static str>  {
+async fn page_index() -> Html<&'static str> {
     // TODO: support template
-    Html(r#"
+    Html(
+        r#"
     <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +41,8 @@ async fn page_index() -> Html<&'static str>  {
 </body>
 
 </html>
-    "#)
+    "#,
+    )
 }
 
 #[shuttle_runtime::main]
