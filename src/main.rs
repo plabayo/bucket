@@ -1,55 +1,67 @@
 use std::path::PathBuf;
 
-use axum::{response::Html, routing::get, Router};
+use axum::{routing::get, Router};
 use tower_http::services::ServeDir;
 
-async fn page_index() -> Html<&'static str> {
-    // TODO: support template
-    Html(
-        r#"
-    <!DOCTYPE html>
-<html lang="en">
+mod pages {
+    use askama::Template;
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    #[derive(Template)]
+    #[template(path = "../templates/index.html")]
+    pub struct IndexTemplate;
 
-    <title>bckt.xzy</title>
+    pub async fn index() -> IndexTemplate {
+        IndexTemplate
+    }
 
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🪣</text></svg>">
+    #[derive(Template)]
+    #[template(path = "../templates/404.html")]
+    pub struct NotFoundTemplate;
 
-    <script src="/static/js/htmx.min.js?v=1.9.6"></script>
-    <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
-</head>
+    pub async fn not_found() -> NotFoundTemplate {
+        NotFoundTemplate
+    }
+}
 
-<body hx-boost="true">
-    <header class="navbar f-switch" style="margin: 0">
-        <h1 class="heading-1 align-self:start">
-            bckt.xzy
-        </h1>
-    </header>
+mod api {
+    use askama::Template;
+    // use axum::extract::Query;
 
-    <main class="width:100% height:100%">
-        <h1>Hello World!</h1>
-        <p>This is not very much yet...</p>
-    </main>
+    #[derive(Template)]
+    #[template(path = "../templates/fragments/link_ok.html")]
+    pub struct LinkOkFragment {
+        original_link: String,
+        short_link: String,
+    }
 
-    <footer class="text-align:center">
-        Made with ❤️ by <a href="https://plabayo.tech">plabayo</a>.
-    </footer>
-</body>
+    // pub struct CreateLinkParams {
+    //     link: String,
+    // }
 
-</html>
-    "#,
-    )
+    // pub async fn create_link(Query(params): Query<CreateLinkParams>) -> LinkOkFragment {
+    //     LinkOkFragment {
+    //         original_link: params.link,
+    //         short_link: "/abc123".to_string(),
+    //     }
+    // }
+}
+
+mod tmp {
+    use axum::response::Redirect;
+
+    pub async fn redirect_link_example() -> Redirect {
+        Redirect::temporary("https://www.example.com")
+    }
 }
 
 #[shuttle_runtime::main]
 async fn axum() -> shuttle_axum::ShuttleAxum {
     let router = Router::new()
-        .route("/", get(page_index))
-        .nest_service("/static", ServeDir::new(PathBuf::from("static")));
+        .route("/", get(pages::index))
+        // .route("/api/link", post(api::create_link))
+        .nest_service("/static", ServeDir::new(PathBuf::from("static")))
+        .route("/abc123", get(tmp::redirect_link_example))
+        .fallback(pages::not_found);
 
     Ok(router.into())
 }

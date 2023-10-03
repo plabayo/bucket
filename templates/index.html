@@ -1,7 +1,12 @@
-{% extends "shared/_layout.html" %}
-{% block main_content %}
+{% extends "base.html" %}
+{% block content %}
 <div class="container">
     <h1>Hello!</h1>
 </div>
-
+<div class="card">
+    <form hx-post="/api/link">
+        <input id="link" name="link" type="text">
+        <button class="good" type="submit">Create Shortlink</button>
+    </form>
+</div>
 {% endblock %}

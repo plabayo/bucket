@@ -12,8 +12,6 @@
 
     <script src="/static/js/htmx.min.js?v=1.9.6"></script>
     <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
-
-    {% block additional_css %}{% endblock %}
 </head>
 
 <body hx-boost="true">
@@ -24,7 +22,7 @@
     </header>
 
     <main class="width:100% height:100%">
-        {% block main_content %}{% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="text-align:center">
