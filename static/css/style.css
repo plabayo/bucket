@@ -1,0 +1,64 @@
+:root {
+    /* fonts */
+    --main-font: sans-sarif;
+    --secondary-font: sans-sarif;
+    --mono-font: "Cascadia Code", monospace, monospace;
+}
+
+/* Light Mode */
+:root {
+    --bg: #F1FAEE;
+    --fg: #1D3557;
+    --muted-fg: #457B9D;
+    --faded-fg: #A8DADC;
+    --graphical-fg: #1D3557;
+    --box-bg: #F1FAEE;
+    --interactive-bg: #A8DADC;
+    --accent: #1D3557;
+    --muted-accent: #457B9D;
+    --plain-fg: #1D3557;
+    --info-fg: #1D3557;
+    --ok-fg: #457B9D;
+    --bad-fg: #E63946;
+    --warn-fg: #E76F51;
+    --plain-graphical-fg: #1D3557;
+    --info-graphical-fg: #457B9D;
+    --ok-graphical-fg: #2A9D8F;
+    --bad-graphical-fg: #E63946;
+    --warn-graphical-fg: #E76F51;
+    --plain-bg: #F1FAEE;
+    --info-bg: #A8DADC;
+    --ok-bg: #2A9D8F;
+    --bad-bg: #E63946;
+    --warn-bg: #E76F51;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root:not(.-no-dark-theme) {
+        --bg: #1D3557;
+        --fg: #F1FAEE;
+        --muted-fg: #A8DADC;
+        --faded-fg: #457B9D;
+        --graphical-fg: #F1FAEE;
+        --box-bg: #1D3557;
+        --interactive-bg: #457B9D;
+        --accent: #F1FAEE;
+        --muted-accent: #A8DADC;
+        --plain-fg: #F1FAEE;
+        --info-fg: #F1FAEE;
+        --ok-fg: #2A9D8F;
+        --bad-fg: #E63946;
+        --warn-fg: #E76F51;
+        --plain-graphical-fg: #F1FAEE;
+        --info-graphical-fg: #A8DADC;
+        --ok-graphical-fg: #2A9D8F;
+        --bad-graphical-fg: #E63946;
+        --warn-graphical-fg: #E76F51;
+        --plain-bg: #1D3557;
+        --info-bg: #457B9D;
+        --ok-bg: #2A9D8F;
+        --bad-bg: #E63946;
+        --warn-bg: #E76F51;
+    }
+}
