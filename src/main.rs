@@ -4,7 +4,11 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use tower_http::services::ServeDir;
+use tower::ServiceBuilder;
+use tower_http::{
+    compression::CompressionLayer, normalize_path::NormalizePathLayer, services::ServeDir,
+    trace::TraceLayer,
+};
 
 mod pages {
     use askama::Template;
@@ -66,7 +70,13 @@ async fn axum() -> shuttle_axum::ShuttleAxum {
         .route("/api/link", post(api::create_link))
         .nest_service("/static", ServeDir::new(PathBuf::from("static")))
         .route("/abc123", get(tmp::redirect_link_example))
-        .fallback(pages::not_found);
+        .fallback(pages::not_found)
+        .layer(
+            ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+                .layer(CompressionLayer::new())
+                .layer(NormalizePathLayer::trim_trailing_slash()),
+        );
 
     Ok(router.into())
 }
