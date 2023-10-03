@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use tower_http::services::ServeDir;
 
 mod pages {
@@ -25,7 +28,8 @@ mod pages {
 
 mod api {
     use askama::Template;
-    // use axum::extract::Query;
+    use axum::Form;
+    use serde::Deserialize;
 
     #[derive(Template)]
     #[template(path = "../templates/fragments/link_ok.html")]
@@ -34,16 +38,17 @@ mod api {
         short_link: String,
     }
 
-    // pub struct CreateLinkParams {
-    //     link: String,
-    // }
+    #[derive(Deserialize)]
+    pub struct CreateLinkParams {
+        link: String,
+    }
 
-    // pub async fn create_link(Query(params): Query<CreateLinkParams>) -> LinkOkFragment {
-    //     LinkOkFragment {
-    //         original_link: params.link,
-    //         short_link: "/abc123".to_string(),
-    //     }
-    // }
+    pub async fn create_link(Form(params): Form<CreateLinkParams>) -> LinkOkFragment {
+        LinkOkFragment {
+            original_link: params.link,
+            short_link: "/abc123".to_string(),
+        }
+    }
 }
 
 mod tmp {
@@ -58,7 +63,7 @@ mod tmp {
 async fn axum() -> shuttle_axum::ShuttleAxum {
     let router = Router::new()
         .route("/", get(pages::index))
-        // .route("/api/link", post(api::create_link))
+        .route("/api/link", post(api::create_link))
         .nest_service("/static", ServeDir::new(PathBuf::from("static")))
         .route("/abc123", get(tmp::redirect_link_example))
         .fallback(pages::not_found);

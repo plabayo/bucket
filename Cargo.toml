@@ -12,6 +12,7 @@ repository = "https://github.com/plabayo/bucket"
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.3"
 axum = "0.6"
+serde = { version = "1.0.188", features = ["derive"] }
 shuttle-axum = "0.27"
 shuttle-runtime = "0.27"
 tokio = "1.28"
