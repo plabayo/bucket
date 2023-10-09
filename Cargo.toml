@@ -14,7 +14,7 @@ askama_axum = "0.3"
 axum = "0.6"
 serde = { version = "1.0.188", features = ["derive"] }
 shuttle-axum = "0.28"
-shuttle-runtime = "0.28"
+shuttle-runtime = "0.29"
 tokio = "1.28"
 tower = { version = "0.4.13", features = ["tracing"] }
 tower-http = { version = "0.4", features = ["fs", "trace", "compression-full", "normalize-path"] }
