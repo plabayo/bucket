@@ -16,3 +16,4 @@ jobs:
           secrets: |
             AUTHORIZED_EMAILS = '${{ secrets.AUTHORIZED_EMAILS }}'
             AUTH_PRIVATE_KEY = '${{ secrets.AUTH_PRIVATE_KEY }}'
+            SENDGRID_API_KEY = '${{ secrets.SENDGRID_API_KEY }}'

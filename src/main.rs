@@ -17,7 +17,11 @@ async fn axum(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> shuttle_
     // - add `authorizer to state` ???
     // - make it compile again...
 
-    let _auth = auth::Auth::new(secret_store.get("AUTHORIZED_EMAILS").unwrap());
+    let _auth = auth::Auth::new(
+        secret_store.get("AUTH_PRIVATE_KEY").unwrap(),
+        secret_store.get("AUTHORIZED_EMAILS").unwrap(),
+        secret_store.get("SENDGRID_API_KEY").unwrap(),
+    );
 
     let router = Router::new()
         .nest_service("/static", ServeDir::new(PathBuf::from("static")))
