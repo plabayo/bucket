@@ -19,11 +19,12 @@ sort:
 	cargo sort --grouped .
 
 clippy-fix:
-    cargo clippy --fix --workspace --all-targets --all-features --allow-dirty
+    cargo clippy --fix --workspace --all-targets --all-features --allow-dirty --allow-staged
 
 fix: fmt sort clippy-fix
 
 commit message: fix qa
+    git add -A
     git commit -am "{{ message }}"
 
 deploy name="bucket": qa
