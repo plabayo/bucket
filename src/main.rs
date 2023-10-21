@@ -22,6 +22,7 @@ async fn axum(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> shuttle_
     let router = Router::new()
         .nest_service("/static", ServeDir::new(PathBuf::from("static")))
         .nest("/", router::new())
+        .fallback(router::not_found::any)
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())

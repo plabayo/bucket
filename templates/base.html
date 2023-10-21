@@ -12,35 +12,27 @@
 
     <script src="/static/js/htmx.min.js?v=1.9.6"></script>
     <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
-    <link rel="stylesheet" href="/static/css/style.css?v=0.1.0" />
+    <link rel="stylesheet" href="/static/css/style.css?t=bucket&v=0.1.0" />
 </head>
 
 <body hx-boost="true">
-    <header class="navbar f-switch" style="margin: 0">
-        <h1 class="heading-1 align-self:start">
-            <a href="/">🪣 bckt.xzy</a>
-        </h1>
-    </header>
+    <main class="width:100%" style="max-width: 780px;">
+        <header class="width:100% center" style="margin: 20px 0;">
+            <h1>
+                <a href="/" style="font-size: 3em">🪣 bckt.xzy</a><v-h>:</v-h>
+                <sub-title>
+                    <a href="https://github.com/plabayo/bucket">Made with</a>
+                    ❤️ by
+                    <a href="https://plabayo.tech">plabayo</a>
+                    .
+                </sub-title>
+            </h1>
+        </header>
 
-    <main class="width:100% height:100%">
+        <div class="center">
         {% block content %}{% endblock %}
+        </div>
     </main>
-
-    <footer class="text-align:center">
-        <p>
-            This project is dual-licensed under both the 
-            <a href="https://github.com/plabayo/bucket/blob/main/LICENSE-MIT">MIT license</a> 
-            and 
-            <a href="https://github.com/plabayo/bucket/blob/main/LICENSE-APACHE">Apache 2.0 License</a>.
-        </p>
-        <p>
-            <a href="https://github.com/plabayo/bucket">
-                Source code available on GitHub
-            </a>
-            .
-        </p>
-        <p>Made with ❤️ by <a href="https://plabayo.tech">plabayo</a>.</p>
-    </footer>
 </body>
 
 </html>
