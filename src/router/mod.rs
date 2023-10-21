@@ -7,7 +7,9 @@ use axum::{
 
 mod index;
 mod link;
+mod login;
 mod redirect;
+mod shared;
 
 pub mod not_found;
 
@@ -38,5 +40,7 @@ pub fn new() -> Router {
         .route("/sitemap.xml", get(get_sitemap_xml))
         .route("/link", get(link::get))
         .route("/link", post(link::post))
+        .route("/login", get(login::get))
+        .route("/login", post(login::post))
         .route("/:hash", get(redirect::get))
 }

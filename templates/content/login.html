@@ -2,16 +2,14 @@
 {% block content %}
 <div class="box" style="width: 100%; max-width: 500px;">
     <strong class="block titlebar">login using a magic link</strong>
-    <form action="/login" class="table rows spacious" style="margin: 10px 0 0 0; padding: 10px;">
+    <form action="/login" method="post" class="table rows spacious" style="margin: 10px 0 0 0; padding: 10px;">
         <p>
             <label for="email">email:</label>
             <input id="email" name="email" type="email" placeholder="email" style="width: 100%; margin: 0 5px 0 0;">
         </p>
         <p>
-            <label></label>
-            <button class="good big" type="submit" style="float: right;">
-                send magic link
-            </button>
+            <span></span>
+            <input class="button good big" type="submit" value="send magic link" style="float: right;">
         </p>
     </form>
 </div>
