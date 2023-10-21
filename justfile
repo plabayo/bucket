@@ -23,6 +23,9 @@ clippy-fix:
 
 fix: fmt sort clippy-fix
 
+update:
+    cargo update
+
 commit message: fix qa
     git add -A
     git commit -am "{{ message }}"
