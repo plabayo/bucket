@@ -4,6 +4,10 @@ use askama::Template;
 #[template(path = "../templates/index.html")]
 pub struct GetTemplate;
 
-pub async fn get() -> GetTemplate {
-    GetTemplate
+#[derive(Template)]
+#[template(path = "../templates/content/login.html")]
+pub struct IndexLoginTemplate;
+
+pub async fn get() -> IndexLoginTemplate {
+    IndexLoginTemplate
 }
