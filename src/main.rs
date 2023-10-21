@@ -1,76 +1,27 @@
 use std::path::PathBuf;
 
-use axum::{
-    routing::{get, post},
-    Router,
-};
+use axum::Router;
+use shuttle_secrets::SecretStore;
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer, normalize_path::NormalizePathLayer, services::ServeDir,
     trace::TraceLayer,
 };
 
-mod pages {
-    use askama::Template;
-
-    #[derive(Template)]
-    #[template(path = "../templates/index.html")]
-    pub struct IndexTemplate;
-
-    pub async fn index() -> IndexTemplate {
-        IndexTemplate
-    }
-
-    #[derive(Template)]
-    #[template(path = "../templates/404.html")]
-    pub struct NotFoundTemplate;
-
-    pub async fn not_found() -> NotFoundTemplate {
-        NotFoundTemplate
-    }
-}
-
-mod api {
-    use askama::Template;
-    use axum::Form;
-    use serde::Deserialize;
-
-    #[derive(Template)]
-    #[template(path = "../templates/fragments/link_ok.html")]
-    pub struct LinkOkFragment {
-        original_link: String,
-        short_link: String,
-    }
-
-    #[derive(Deserialize)]
-    pub struct CreateLinkParams {
-        link: String,
-    }
-
-    pub async fn create_link(Form(params): Form<CreateLinkParams>) -> LinkOkFragment {
-        LinkOkFragment {
-            original_link: params.link,
-            short_link: "/abc123".to_string(),
-        }
-    }
-}
-
-mod tmp {
-    use axum::response::Redirect;
-
-    pub async fn redirect_link_example() -> Redirect {
-        Redirect::temporary("https://www.example.com")
-    }
-}
+mod auth;
+mod router;
 
 #[shuttle_runtime::main]
-async fn axum() -> shuttle_axum::ShuttleAxum {
+async fn axum(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> shuttle_axum::ShuttleAxum {
+    // TODO:
+    // - add `authorizer to state` ???
+    // - make it compile again...
+
+    let _auth = auth::Auth::new(secret_store.get("AUTHORIZED_EMAILS").unwrap());
+
     let router = Router::new()
-        .route("/", get(pages::index))
-        .route("/api/link", post(api::create_link))
         .nest_service("/static", ServeDir::new(PathBuf::from("static")))
-        .route("/abc123", get(tmp::redirect_link_example))
-        .fallback(pages::not_found)
+        .nest("/", router::new())
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())

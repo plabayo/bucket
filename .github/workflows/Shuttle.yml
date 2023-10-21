@@ -13,3 +13,5 @@ jobs:
       - uses: shuttle-hq/deploy-action@main
         with:
           deploy-key: ${{ secrets.SHUTTLE_DEPLOY_KEY }}
+          secrets: |
+            AUTHORIZED_EMAILS = '${{ secrets.AUTHORIZED_EMAILS }}'
