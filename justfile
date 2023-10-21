@@ -26,8 +26,8 @@ fix: fmt sort clippy-fix
 commit message: fix qa
     git commit -am "{{ message }}"
 
-deploy name="routine": qa
+deploy name="bucket": qa
     cargo shuttle deploy --name {{name}} --no-test
 
-watch name="routine":
-    cargo watch -x 'shuttle run --name {{name}}' -i 'routine-app,Cargo.lock'
+watch name="bucket":
+    cargo watch -x 'shuttle run --name {{name}}' -i 'Cargo.lock'
