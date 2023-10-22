@@ -3,6 +3,9 @@
     --main-font: sans-sarif;
     --secondary-font: sans-sarif;
     --mono-font: "Cascadia Code", monospace, monospace;
+
+    /* layout */
+    --density: 1.5;
 }
 
 /* Light Mode */
