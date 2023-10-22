@@ -12,10 +12,13 @@ repository = "https://github.com/plabayo/bucket"
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.3"
 axum = "0.6"
-serde = { version = "1.0.188", features = ["derive"] }
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 shuttle-axum = "0.29"
 shuttle-runtime = "0.29"
 shuttle-secrets = "0.29"
 tokio = "1.28"
-tower = { version = "0.4.13", features = ["tracing"] }
+tower = { version = "0.4", features = ["tracing"] }
 tower-http = { version = "0.4", features = ["fs", "trace", "compression-full", "normalize-path"] }
+tracing = "0.1"

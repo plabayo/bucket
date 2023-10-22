@@ -1,5 +1,12 @@
+use std::sync::Arc;
+
 use askama_axum::{IntoResponse, Response};
-use axum::{extract::Query, http::StatusCode, response::Redirect, Form};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    response::Redirect,
+    Form,
+};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -22,7 +29,10 @@ pub struct PostParams {
     email: String,
 }
 
-pub async fn post(Form(params): Form<PostParams>) -> Response {
+pub async fn post(
+    State(state): State<Arc<crate::router::State>>,
+    Form(params): Form<PostParams>,
+) -> Response {
     if params.email.is_empty() {
         return (
             StatusCode::BAD_REQUEST,
@@ -33,6 +43,18 @@ pub async fn post(Form(params): Form<PostParams>) -> Response {
         )
             .into_response();
     }
+
+    if let Err((msg, status)) = state.auth.send_magic_link(&params.email).await {
+        return (
+            status,
+            super::shared::ErrorTemplate {
+                title: "failed to send magic link".to_string(),
+                message: msg,
+            },
+        )
+            .into_response();
+    }
+
     super::shared::InfoTemplate {
         title: format!("email sent to {}", params.email),
         message: format!("Magic link has been sent to {}. Please open the link in the email to login to this site.", params.email),
