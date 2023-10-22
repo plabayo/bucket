@@ -1,21 +1,25 @@
-use std::sync::Arc;
-
 use axum::http::StatusCode;
+use base64::{engine::general_purpose, Engine as _};
+use orion::aead::SecretKey;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Auth {
-    email_validator: Arc<EmailValidator>,
+    email_validator: EmailValidator,
     sendgrid_api_key: String,
+    secret_key: SecretKey,
 }
 
 // TODO implement using
 // - orion for encryption
 
 impl Auth {
-    pub fn new(_private_key: String, raw_auth_emails: String, sendgrid_api_key: String) -> Self {
+    pub fn new(private_key: String, raw_auth_emails: String, sendgrid_api_key: String) -> Self {
+        let secret_key =
+            SecretKey::from_slice(private_key.as_bytes()).expect("invalid private key");
         Self {
-            email_validator: Arc::new(EmailValidator::new(raw_auth_emails)),
+            email_validator: EmailValidator::new(raw_auth_emails),
             sendgrid_api_key,
+            secret_key,
         }
     }
 
@@ -27,9 +31,26 @@ impl Auth {
             ));
         }
 
-        // TODO create actual magic here...
-        let magic = "hello";
+        // create magic
+        let magic = AuthTokenMagic::new(email.to_string())
+            .map_err(|e| {
+                tracing::error!("failed making auth token magic: {:?}", e);
+                (
+                    "failed making auth token magic".to_string(),
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                )
+            })?
+            .to_string();
+        let cipher_text = orion::aead::seal(&self.secret_key, magic.as_bytes()).map_err(|e| {
+            tracing::error!("failed encrypting magic: {:?}", e);
+            (
+                "failed encrypting magic".to_string(),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            )
+        })?;
+        let magic = general_purpose::STANDARD_NO_PAD.encode(&cipher_text);
 
+        // send magic
         let client = reqwest::Client::new();
         let result = client
             .post("https://api.sendgrid.com/v3/mail/send")
@@ -103,6 +124,72 @@ impl Auth {
         }
 
         Ok(())
+    }
+}
+
+struct AuthTokenMagic {
+    email: String,
+    token: Vec<u8>,
+    expires_at: u64,
+}
+
+impl AuthTokenMagic {
+    pub fn new(email: String) -> Result<Self, String> {
+        let mut token = [0u8; 16];
+        orion::util::secure_rand_bytes(&mut token).map_err(|e| e.to_string())?;
+        let expires_at = chrono::Utc::now()
+            .checked_add_signed(chrono::Duration::hours(24))
+            .ok_or("failed to calculate expires_at")?
+            .timestamp() as u64;
+        Ok(Self {
+            email,
+            token: token.to_vec(),
+            expires_at,
+        })
+    }
+}
+
+impl std::fmt::Display for AuthTokenMagic {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = serde_json::json!({
+            "email": self.email,
+            "token": general_purpose::STANDARD_NO_PAD.encode(&self.token),
+            "expires_at": self.expires_at,
+        })
+        .to_string();
+        write!(f, "{value}")
+    }
+}
+
+impl TryFrom<&str> for AuthTokenMagic {
+    type Error = String;
+
+    fn try_from(raw: &str) -> Result<Self, Self::Error> {
+        let value: serde_json::Value = serde_json::from_str(raw).map_err(|e| e.to_string())?;
+        let email = value
+            .get("email")
+            .ok_or("missing email")?
+            .as_str()
+            .ok_or("invalid email")?
+            .to_owned();
+        let token = value
+            .get("token")
+            .ok_or("missing token")?
+            .as_str()
+            .ok_or("invalid token")?;
+        let token = general_purpose::STANDARD_NO_PAD
+            .decode(token.as_bytes())
+            .map_err(|e| e.to_string())?;
+        let expires_at = value
+            .get("expires_at")
+            .ok_or("missing expires_at")?
+            .as_u64()
+            .ok_or("invalid expires_at")?;
+        Ok(Self {
+            email,
+            token,
+            expires_at,
+        })
     }
 }
 
