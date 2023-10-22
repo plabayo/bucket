@@ -20,28 +20,28 @@
     <meta property="og:description" content="link shortener and secret share" />
     <meta property="og:url" content="https://bckt.xyz/" />
     <meta property="og:site_name" content="bckt.xyz" />
-    <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/3/3b/Sand_bucket.jpg">
+    <meta property="og:image" content="/og-image">
 
     <script src="/static/js/htmx.min.js?v=1.9.6"></script>
     <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
     <link rel="stylesheet" href="/static/css/style.css?t=bucket&v=0.1.1" />
 </head>
 
-<body hx-boost="true">
+<body>
     <main class="width:100%" style="max-width: 780px;">
         <header class="width:100% center" style="margin: 0 0 10px 0;">
             <h1 style="margin: 0;">
-                <a href="/">🪣 bckt.xyz</a>
+                <a href="/" hx-boost="true">🪣 bckt.xyz</a>
             </h1>
             <p style="margin: 0; padding-bottom: 10px;">
-                <a href="https://github.com/plabayo/bucket">Made with</a>
+                <a href="/code">Made with</a>
                 ❤️ by
-                <a href="https://plabayo.tech">plabayo</a>
+                <a href="/author">plabayo</a>
                 .
             </p>
         </header>
 
-        <div class="center" style="padding: 5px">
+        <div id="content" class="center" style="padding: 5px" hx-boost="true">
             {% block content %}{% endblock %}
         </div>
     </main>
