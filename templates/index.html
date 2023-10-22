@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-    <h1>Hello!</h1>
+    <h1 style="margin: 0">Welcome <code>{{ email }}</code>.</h1>
+    <section class="tool-bar">
+        <a href="/logout" class="<button>">Logout 👋</a>
+    </section>
 </div>
 <div class="box card">
     <strong class="block titlebar">🔗 Create a Shortlink</strong>

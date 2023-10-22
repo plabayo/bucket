@@ -4,10 +4,14 @@ use serde::Deserialize;
 
 #[derive(Template)]
 #[template(path = "../templates/index.html")]
-pub struct GetTemplate;
+pub struct GetTemplate {
+    pub email: String,
+}
 
 pub async fn get() -> GetTemplate {
-    GetTemplate
+    GetTemplate {
+        email: "foo@example.com".to_string(),
+    }
 }
 
 #[derive(Template)]

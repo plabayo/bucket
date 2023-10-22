@@ -23,5 +23,6 @@ shuttle-runtime = "0.29"
 shuttle-secrets = "0.29"
 tokio = "1.28"
 tower = { version = "0.4", features = ["tracing"] }
+tower-cookies = "0.9"
 tower-http = { version = "0.4", features = ["fs", "trace", "compression-full", "normalize-path"] }
 tracing = "0.1"

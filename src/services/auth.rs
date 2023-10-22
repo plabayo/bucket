@@ -2,6 +2,8 @@ use axum::http::StatusCode;
 use base64::{engine::general_purpose, Engine as _};
 use orion::aead::SecretKey;
 
+pub const COOKIE_NAME: &str = "bckt-auth";
+
 #[derive(Debug)]
 pub struct Auth {
     email_validator: EmailValidator,
@@ -48,7 +50,7 @@ impl Auth {
                 StatusCode::INTERNAL_SERVER_ERROR,
             )
         })?;
-        let magic = general_purpose::STANDARD_NO_PAD.encode(&cipher_text);
+        let magic = general_purpose::URL_SAFE.encode(&cipher_text);
 
         // send magic
         let client = reqwest::Client::new();
@@ -125,12 +127,109 @@ impl Auth {
 
         Ok(())
     }
+
+    pub fn verify_magic(&self, magic: impl AsRef<str>) -> Option<(String, u64)> {
+        let magic = magic.as_ref();
+        let cipher_text = match general_purpose::URL_SAFE.decode(magic.as_bytes()) {
+            Ok(cipher_text) => cipher_text,
+            Err(e) => {
+                tracing::debug!("failed decoding magic: {:?}", e);
+                return None;
+            }
+        };
+        let magic = match orion::aead::open(&self.secret_key, &cipher_text) {
+            Ok(magic) => magic,
+            Err(e) => {
+                tracing::debug!("failed decrypting magic: {:?}", e);
+                return None;
+            }
+        };
+        let mut magic = match AuthTokenMagic::try_from(std::str::from_utf8(&magic).unwrap()) {
+            Ok(magic) => magic,
+            Err(e) => {
+                tracing::debug!("failed parsing magic: {:?}", e);
+                return None;
+            }
+        };
+        if magic.expires_at < chrono::Utc::now().timestamp() as u64 {
+            tracing::debug!("magic expired");
+            return None;
+        }
+        if magic.verified {
+            tracing::debug!("magic already verified");
+            return None;
+        }
+
+        // make it verified and allow it to be used for a week
+        magic.verified = true;
+        magic.expires_at = chrono::Utc::now()
+            .checked_add_signed(chrono::Duration::days(7))
+            .unwrap()
+            .timestamp() as u64;
+        let expires_at = magic.expires_at;
+
+        let magic = magic.to_string();
+        let result_cipher_text =
+            orion::aead::seal(&self.secret_key, magic.as_bytes()).map_err(|e| {
+                tracing::error!("failed encrypting magic: {:?}", e);
+                (
+                    "failed encrypting magic".to_string(),
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                )
+            });
+        let cipher_text = match result_cipher_text {
+            Ok(cipher_text) => cipher_text,
+            Err(e) => {
+                tracing::debug!("failed encrypting magic: {:?}", e);
+                return None;
+            }
+        };
+        let magic = general_purpose::URL_SAFE.encode(cipher_text);
+
+        Some((magic, expires_at))
+    }
+
+    pub fn verify_cookie(&self, magic: impl AsRef<str>) -> Option<String> {
+        let magic = magic.as_ref();
+        let cipher_text = match general_purpose::URL_SAFE.decode(magic.as_bytes()) {
+            Ok(cipher_text) => cipher_text,
+            Err(e) => {
+                tracing::debug!("failed decoding magic: {:?}", e);
+                return None;
+            }
+        };
+        let magic = match orion::aead::open(&self.secret_key, &cipher_text) {
+            Ok(magic) => magic,
+            Err(e) => {
+                tracing::debug!("failed decrypting magic: {:?}", e);
+                return None;
+            }
+        };
+        let magic = match AuthTokenMagic::try_from(std::str::from_utf8(&magic).unwrap()) {
+            Ok(magic) => magic,
+            Err(e) => {
+                tracing::debug!("failed parsing magic: {:?}", e);
+                return None;
+            }
+        };
+        if magic.expires_at < chrono::Utc::now().timestamp() as u64 {
+            tracing::debug!("magic expired");
+            return None;
+        }
+        if !magic.verified {
+            tracing::debug!("magic not yet verified");
+            return None;
+        }
+
+        Some(magic.email)
+    }
 }
 
 struct AuthTokenMagic {
     email: String,
     token: Vec<u8>,
     expires_at: u64,
+    verified: bool,
 }
 
 impl AuthTokenMagic {
@@ -145,6 +244,7 @@ impl AuthTokenMagic {
             email,
             token: token.to_vec(),
             expires_at,
+            verified: false,
         })
     }
 }
@@ -153,8 +253,9 @@ impl std::fmt::Display for AuthTokenMagic {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = serde_json::json!({
             "email": self.email,
-            "token": general_purpose::STANDARD_NO_PAD.encode(&self.token),
+            "token": general_purpose::URL_SAFE.encode(&self.token),
             "expires_at": self.expires_at,
+            "verified": self.verified,
         })
         .to_string();
         write!(f, "{value}")
@@ -177,7 +278,7 @@ impl TryFrom<&str> for AuthTokenMagic {
             .ok_or("missing token")?
             .as_str()
             .ok_or("invalid token")?;
-        let token = general_purpose::STANDARD_NO_PAD
+        let token = general_purpose::URL_SAFE
             .decode(token.as_bytes())
             .map_err(|e| e.to_string())?;
         let expires_at = value
@@ -185,10 +286,16 @@ impl TryFrom<&str> for AuthTokenMagic {
             .ok_or("missing expires_at")?
             .as_u64()
             .ok_or("invalid expires_at")?;
+        let verified = value
+            .get("verified")
+            .ok_or("missing verified")?
+            .as_bool()
+            .ok_or("invalid verified")?;
         Ok(Self {
             email,
             token,
             expires_at,
+            verified,
         })
     }
 }

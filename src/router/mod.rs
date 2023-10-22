@@ -5,6 +5,7 @@ use axum::{
     Router,
 };
 use tower::ServiceBuilder;
+use tower_cookies::CookieManagerLayer;
 use tower_http::{
     compression::CompressionLayer, normalize_path::NormalizePathLayer, services::ServeDir,
     trace::TraceLayer,
@@ -13,6 +14,7 @@ use tower_http::{
 mod index;
 mod link;
 mod login;
+mod logout;
 mod memory;
 mod not_found;
 mod redirect;
@@ -32,8 +34,10 @@ fn new_root(state: State) -> Router {
         .route("/link", post(link::post))
         .route("/login", get(login::get))
         .route("/login", post(login::post))
+        .route("/logout", get(logout::get))
         .route("/:hash", get(redirect::get))
         .with_state(Arc::new(state))
+        .layer(CookieManagerLayer::new())
 }
 
 pub fn new(state: State) -> Router {

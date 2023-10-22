@@ -8,19 +8,42 @@ use axum::{
     Form,
 };
 use serde::Deserialize;
+use tower_cookies::{cookie::time::OffsetDateTime, Cookie, Cookies};
 
 #[derive(Deserialize)]
 pub struct GetQuery {
     pub magic: Option<String>,
 }
 
-pub async fn get(Query(query): Query<GetQuery>) -> Redirect {
+pub async fn get(
+    Query(query): Query<GetQuery>,
+    State(state): State<Arc<crate::router::State>>,
+    cookies: Cookies,
+) -> Redirect {
     let magic = match query.magic {
         Some(magic) => magic,
         None => return Redirect::temporary("/"),
     };
 
-    println!("Login attempt with magic link: {}", magic);
+    match state.auth.verify_magic(magic) {
+        Some((magic, expires_at)) => {
+            let mut cookie = Cookie::new(crate::services::COOKIE_NAME, magic);
+            cookie.set_path("/");
+            let offset = OffsetDateTime::from_unix_timestamp(expires_at as i64).unwrap();
+            cookie.set_expires(offset);
+            cookies.add(cookie);
+        }
+        None => {
+            let mut cookie = Cookie::new(crate::services::COOKIE_NAME, "");
+            cookie.set_path("/");
+            let offset = OffsetDateTime::from_unix_timestamp(0_i64).unwrap();
+            cookie.set_expires(offset);
+            cookies.add(cookie);
+            return Redirect::to("/");
+        }
+    }
+
+    tracing::debug!("login user with magic link");
     Redirect::temporary("/")
 }
 

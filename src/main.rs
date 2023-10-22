@@ -16,5 +16,6 @@ async fn axum(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> shuttle_
     let state = router::State { auth };
     let router = router::new(state);
 
+    tracing::debug!("starting axum router");
     Ok(router.into())
 }
