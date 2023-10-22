@@ -1,46 +1,50 @@
+use std::{path::PathBuf, sync::Arc};
+
 use axum::{
-    http::HeaderMap,
-    response::IntoResponse,
     routing::{get, post},
     Router,
+};
+use tower::ServiceBuilder;
+use tower_http::{
+    compression::CompressionLayer, normalize_path::NormalizePathLayer, services::ServeDir,
+    trace::TraceLayer,
 };
 
 mod index;
 mod link;
 mod login;
+mod memory;
+mod not_found;
 mod redirect;
 mod shared;
 
-pub mod not_found;
-
-pub async fn get_robots_txt() -> &'static str {
-    r"User-agent: *
-Allow: /
-Sitemap: https://bckt.xyz/sitemap.xml
-"
+#[derive(Debug, Clone)]
+pub struct State {
+    pub auth: crate::services::Auth,
 }
 
-pub async fn get_sitemap_xml() -> impl IntoResponse {
-    let body = r#"<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>https://bckt.xyz/</loc>
-    </url>
-</urlset>"#;
-
-    let mut headers = HeaderMap::new();
-    headers.insert("content-type", "application/xml".parse().unwrap());
-
-    (headers, body)
-}
-
-pub fn new() -> Router {
+fn new_root(state: State) -> Router {
     Router::new()
         .route("/", get(index::get))
-        .route("/robots.txt", get(get_robots_txt))
-        .route("/sitemap.xml", get(get_sitemap_xml))
+        .route("/robots.txt", get(memory::get_robots_txt))
+        .route("/sitemap.xml", get(memory::get_sitemap_xml))
         .route("/link", get(link::get))
         .route("/link", post(link::post))
         .route("/login", get(login::get))
         .route("/login", post(login::post))
         .route("/:hash", get(redirect::get))
+        .with_state(Arc::new(state))
+}
+
+pub fn new(state: State) -> Router {
+    Router::new()
+        .nest_service("/static", ServeDir::new(PathBuf::from("static")))
+        .nest("/", new_root(state))
+        .fallback(not_found::any)
+        .layer(
+            ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+                .layer(CompressionLayer::new())
+                .layer(NormalizePathLayer::trim_trailing_slash()),
+        )
 }

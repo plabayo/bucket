@@ -1,5 +1,5 @@
 use askama_axum::{IntoResponse, Response};
-use axum::{extract::Query, response::Redirect, Form};
+use axum::{extract::Query, http::StatusCode, response::Redirect, Form};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -24,11 +24,14 @@ pub struct PostParams {
 
 pub async fn post(Form(params): Form<PostParams>) -> Response {
     if params.email.is_empty() {
-        return super::shared::ErrorTemplate {
-            title: "email is required".to_string(),
-            message: "Please enter your email address.".to_string(),
-        }
-        .into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            super::shared::ErrorTemplate {
+                title: "email is required".to_string(),
+                message: "Please enter your email address.".to_string(),
+            },
+        )
+            .into_response();
     }
     super::shared::InfoTemplate {
         title: format!("email sent to {}", params.email),

@@ -1,9 +1,16 @@
-use askama::Template;
+use axum::{
+    body::Body,
+    http::{Request, StatusCode},
+};
 
-#[derive(Template)]
-#[template(path = "../templates/404.html")]
-pub struct GetTemplate;
+use crate::router::shared::ErrorTemplate;
 
-pub async fn any() -> GetTemplate {
-    GetTemplate
+pub async fn any(request: Request<Body>) -> (StatusCode, ErrorTemplate) {
+    (
+        StatusCode::NOT_FOUND,
+        ErrorTemplate {
+            title: "404 — Not Found".to_string(),
+            message: format!("The page '{}' does not exist.", request.uri().path()),
+        },
+    )
 }
