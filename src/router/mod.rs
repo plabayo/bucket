@@ -23,6 +23,7 @@ mod shared;
 #[derive(Debug, Clone)]
 pub struct State {
     pub auth: Arc<crate::services::Auth>,
+    pub storage: crate::services::Storage,
 }
 
 fn new_root(state: State) -> Router {

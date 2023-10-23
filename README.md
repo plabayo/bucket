@@ -45,6 +45,27 @@ using a codebase written in Rust and make use of dependencies such as
 In case you have furher questions you can ping `@glendc` at
 [Shuttle's Discord](https://discord.gg/YDHm6Yz3).
 
+## Work In Progress
+
+This project is not yet finished. Use at your own risk.
+
+Developer todos:
+
+- split auth:
+  - create magic module: MagicIdentity, MagicSender
+    - also store email as lower in MagicIdentity
+  - provide proper Identity in data.rs: basically a hash from email, this is also used by MagicIdentity
+- create secret logic (dirty)
+- list created links by user
+- allow created links by user to be delete
+- allow secrets to be deleted
+- switch storage for real storage
+- import blocklists for all kind of nasty domains which we want to avoid
+- add l18n support using `i18n-embed-fl` and `accept-language` crates (for now only english, dutch and spanish support);
+- add support for all known languages possible;
+- move allowed_email_filters to db storage;
+- support invites for users as long as we have less then 50;
+
 ## Contributing
 
 🎈 Thanks for your help improving the project! We are so happy to have

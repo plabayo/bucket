@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use shuttle_secrets::SecretStore;
 
+mod data;
 mod router;
 mod services;
 
@@ -13,7 +14,9 @@ async fn axum(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> shuttle_
         secret_store.get("SENDGRID_API_KEY").unwrap(),
     ));
 
-    let state = router::State { auth };
+    let storage = services::Storage::new();
+
+    let state = router::State { auth, storage };
     let router = router::new(state);
 
     tracing::debug!("starting axum router");

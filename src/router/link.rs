@@ -6,6 +6,8 @@ use axum::{extract::State, http::StatusCode, response::Redirect, Form};
 use serde::Deserialize;
 use tower_cookies::Cookies;
 
+use crate::data::Shortlink;
+
 #[derive(Template)]
 #[template(path = "../templates/content/link.html")]
 pub struct GetTemplate {
@@ -104,12 +106,71 @@ pub async fn post(
                     .into_response();
             }
 
-            // TODO validate domain
+            // validate domains
+            let domain = match url.domain() {
+                Some(domain) => domain,
+                None => {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        super::shared::ErrorTemplate {
+                            title: "Invalid Long URL".to_string(),
+                            message: "The long URL is invalid. No domain found.".to_string(),
+                            back_path: format!("/link?long={}", long),
+                        },
+                    )
+                        .into_response();
+                }
+            };
+            // ...only allow second level domains or higher
+            if domain.split('.').count() < 2 {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    super::shared::ErrorTemplate {
+                        title: "Invalid Long URL".to_string(),
+                        message: "The long URL is invalid. Bare top level domains are not allowed."
+                            .to_string(),
+                        back_path: format!("/link?long={}", long),
+                    },
+                )
+                    .into_response();
+            }
+            // ...only allow domains that are not blocked
+            if state.storage.is_domain_blocked(domain).await {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    super::shared::ErrorTemplate {
+                        title: "Invalid Long URL".to_string(),
+                        message: "The long URL is invalid. The domain is blocked.".to_string(),
+                        back_path: format!("/link?long={}", long),
+                    },
+                )
+                    .into_response();
+            }
+
+            // create shortlink
+            let shortlink = Shortlink::new(url.to_string(), email.clone());
+
+            // store shortlink
+            if let Err(err) = state.storage.add_shortlink(&shortlink).await {
+                tracing::error!("Failed to store shortlink for long url {}: {}", long, err);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    super::shared::ErrorTemplate {
+                        title: "Failed to store shortlink".to_string(),
+                        message: format!(
+                            "Failed to store shortlink for long url '{}'. Please try again later.",
+                            long
+                        ),
+                        back_path: format!("/link?long={}", long),
+                    },
+                )
+                    .into_response();
+            };
 
             return PostOkTemplate {
                 email,
-                long,
-                short: "example.com".to_string(),
+                long: shortlink.long_url().to_string(),
+                short: shortlink.short_url(),
             }
             .into_response();
         }

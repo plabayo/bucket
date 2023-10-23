@@ -314,6 +314,7 @@ dependencies = [
  "axum",
  "base64 0.21.5",
  "chrono",
+ "nanoid",
  "orion",
  "reqwest",
  "serde",
@@ -1176,6 +1177,15 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys",
+]
+
+[[package]]
+name = "nanoid"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ffa00dec017b5b1a8b7cf5e2c008bfda1aa7e0697ac1508b491fdf2622fb4d8"
+dependencies = [
+ "rand",
 ]
 
 [[package]]
