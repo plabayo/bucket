@@ -5,6 +5,7 @@ use askama::Template;
 pub struct InfoTemplate {
     pub title: String,
     pub message: String,
+    pub back_path: String,
 }
 
 #[derive(Template)]
@@ -12,4 +13,5 @@ pub struct InfoTemplate {
 pub struct ErrorTemplate {
     pub title: String,
     pub message: String,
+    pub back_path: String,
 }

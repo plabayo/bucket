@@ -62,6 +62,7 @@ pub async fn post(
             super::shared::ErrorTemplate {
                 title: "email is required".to_string(),
                 message: "Please enter your email address.".to_string(),
+                back_path: "/".to_string(),
             },
         )
             .into_response();
@@ -73,6 +74,7 @@ pub async fn post(
             super::shared::ErrorTemplate {
                 title: "failed to send magic link".to_string(),
                 message: msg,
+                back_path: "/".to_string(),
             },
         )
             .into_response();
@@ -81,5 +83,6 @@ pub async fn post(
     super::shared::InfoTemplate {
         title: format!("email sent to {}", params.email),
         message: format!("Magic link has been sent to {}. Please open the link in the email to login to this site.", params.email),
+        back_path: "/".to_string(),
     }.into_response()
 }
