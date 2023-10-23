@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "content/shared/link_nav.html" %}
+<div class="box info" style="width: 100%">
+    <strong class="block titlebar">🔗 Link Created</strong>
+    <p>
+        <a href="{{ long }}">{{ long }}</a> can be found shortened
+        as <a href="{{ short }}" hx-boost="false">{{ short }}</a>.
+    </p>
+    <p>
+        <a href="/" class="<button> good big" style="margin: 10px 0 0 0; float: right;" autofocus>↩ go back</a>
+    </p>
+</div>
+{% endblock %}

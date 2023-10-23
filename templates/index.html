@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-    <h1 style="margin: 0">Welcome <code>{{ email }}</code>.</h1>
+<div class="container crowded">
+    <h3>welcome <code>{{ email }}</code></h1>
     <section class="tool-bar">
-        <a href="/logout" class="<button>">Logout 👋</a>
+        <a href="/logout" class="<button> bad">Logout 👋</a>
     </section>
 </div>
 <div class="box card">
-    <strong class="block titlebar">🔗 Create a Shortlink</strong>
-    <form hx-post="/api/link">
-        <input id="link" name="link" type="text">
-        <button class="good" type="submit">Create Shortlink</button>
-    </form>
+    <strong class="block titlebar">🔗 Shortlinks</strong>
+    <p>
+        Shortlinks are a way to shorten long URLs.
+        You can start creating a shortlink or manage your existing ones
+        using the button below.
+    </p>
+    <p>
+        <a href="/link" class="<button> big" style="float: right">Manage Shortlinks</a>
+    </p>
 </div>
 {% endblock %}
