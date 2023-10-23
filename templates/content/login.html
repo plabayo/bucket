@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="box" style="width: 100%">
-    <strong class="block titlebar">login using a magic link</strong>
+    <strong class="block titlebar">⎆login using a magic link</strong>
     <form action="/login" method="post" style="margin: 10px 0 0 0; padding: 10px;">
         <div class="table rows spacious">
             <p>
@@ -10,6 +10,11 @@
                     id="email" name="email"
                     type="email" placeholder="email"
                     style="width: 100%; margin: 0 5px 0 0;"
+                    {% match email %}
+                    {% when Some with (val) %}
+                        value="{{ val }}"
+                    {% when None %}
+                    {% endmatch %}
                     autofocus
                 >
             </p>

@@ -11,12 +11,17 @@
                     id="long" name="long"
                     type="long" placeholder="long"
                     style="width: 100%; margin: auto; vertical-align: middle;"
+                    {% match long %}
+                    {% when Some with (val) %}
+                        value="{{ val }}"
+                    {% when None %}
+                    {% endmatch %}
                     autofocus
                 >
             </p>
         </div>
         <p>
-            <input class="button good big" type="submit" value="Create Shortlink" style="float: right;">
+            <input class="button good big" type="submit" value="🛠️ Create Shortlink" style="float: right;">
         </p>
     </form>
 </div>

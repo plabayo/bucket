@@ -8,6 +8,15 @@
     --density: 1.5;
 }
 
+.titlebar {
+    padding-top: calc(var(--rhythm)*var(--density)*0.1);
+    padding-bottom: calc(var(--rhythm)*var(--density)*0.1);
+}
+
+button:hover, .\<button\>:hover, input[type=submit]:hover {
+    cursor: pointer;
+}
+
 /* Light Mode */
 :root {
     --bg: #F1FAEE;

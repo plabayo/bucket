@@ -74,7 +74,7 @@ pub async fn post(
             super::shared::ErrorTemplate {
                 title: "failed to send magic link".to_string(),
                 message: msg,
-                back_path: "/".to_string(),
+                back_path: format!("/?email={}", params.email),
             },
         )
             .into_response();

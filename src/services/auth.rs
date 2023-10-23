@@ -27,8 +27,8 @@ impl Auth {
 
     pub async fn send_magic_link(&self, email: &str) -> Result<(), (String, StatusCode)> {
         if !self.email_validator.validate(email) {
-            return Err((
-                "Email is not authorized to login. Please enter another email or ask an invite to @glendc.".to_string(),
+            return Err((format!(
+                "Email '{}' is not authorized to login. Please enter another email or ask an invite to @glendc.", email),
                 StatusCode::UNAUTHORIZED,
             ));
         }
@@ -237,7 +237,7 @@ impl AuthTokenMagic {
         let mut token = [0u8; 16];
         orion::util::secure_rand_bytes(&mut token).map_err(|e| e.to_string())?;
         let expires_at = chrono::Utc::now()
-            .checked_add_signed(chrono::Duration::hours(24))
+            .checked_add_signed(chrono::Duration::hours(1))
             .ok_or("failed to calculate expires_at")?
             .timestamp() as u64;
         Ok(Self {
