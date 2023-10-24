@@ -17,7 +17,7 @@ button:hover, .\<button\>:hover, input[type=submit]:hover {
     cursor: pointer;
 }
 
-.table div p {
+.table > div > p {
     padding: calc(var(--gap)*0.2);
 }
 

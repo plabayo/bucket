@@ -1,10 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container crowded">
+<div class="container crowded margin-block">
     <h3>welcome <code>{{ email }}</code></h1>
     <section class="tool-bar">
         <a href="/logout" class="<button> bad">👋 Logout</a>
     </section>
+</div>
+<div class="table rows spacious">
+    <div>
+        <p>
+            On this page you can click through to create and manage shortlinks and secrets.
+            Shortlinks and secrets can be shared with anyone, and require no login to this platform.
+        </p>
+    </div>
+    <div>
+        <p>
+            Secrets are a way to share sensitive information, and are encrypted client-side,
+            can expire and even be one-time use.
+        </p>
+    </div>
 </div>
 <div class="box card">
     <strong class="block titlebar">🔗 Shortlinks</strong>
