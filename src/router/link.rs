@@ -59,7 +59,7 @@ pub async fn post(
         if let Some(email) = state.auth.verify_cookie(cookie.value()) {
             if params.long.is_empty() {
                 return LinkPostResponse::BadRequest {
-                    reason: "URL is not specified",
+                    reason: "URL is not specified.",
                     long: params.long,
                 };
             }
@@ -161,7 +161,11 @@ impl IntoResponse for LinkPostResponse {
                 StatusCode::BAD_REQUEST,
                 super::shared::ErrorTemplate {
                     title: "Invalid Long URL".to_string(),
-                    message: format!("The long URL '{}' is invalid. {}", long, reason,),
+                    message: if long.is_empty() {
+                        format!("The long URL is invalid. {}", reason)
+                    } else {
+                        format!("The long URL '{}' is invalid. {}", long, reason)
+                    },
                     back_path: format!("/link?long={}", long),
                 },
             )
