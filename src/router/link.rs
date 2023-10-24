@@ -54,97 +54,65 @@ pub async fn post(
     State(state): State<Arc<crate::router::State>>,
     cookies: Cookies,
     Form(params): Form<PostParams>,
-) -> Response {
+) -> impl IntoResponse {
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
         if let Some(email) = state.auth.verify_cookie(cookie.value()) {
             if params.long.is_empty() {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    super::shared::ErrorTemplate {
-                        title: "Long URL Missing".to_string(),
-                        message: "The long URL must be specified.".to_string(),
-                        back_path: "/link".to_string(),
-                    },
-                )
-                    .into_response();
+                return LinkPostResponse::BadRequest {
+                    reason: "URL is not specified",
+                    long: params.long,
+                };
             }
 
             // default to https
-            let long: String =
-                if params.long.starts_with("http://") || params.long.starts_with("https://") {
-                    params.long.clone()
-                } else {
-                    format!("https://{}", params.long)
-                };
+            let long: String = if params.long.contains("://") {
+                params.long.clone()
+            } else {
+                format!("https://{}", params.long)
+            };
 
             // validate url
             let url = match reqwest::Url::parse(&long) {
                 Ok(url) => url,
                 Err(_) => {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        super::shared::ErrorTemplate {
-                            title: "Invalid Long URL".to_string(),
-                            message: "The long URL is invalid.".to_string(),
-                            back_path: format!("/link?long={}", long),
-                        },
-                    )
-                        .into_response();
+                    return LinkPostResponse::BadRequest {
+                        reason: "URL is invalid.",
+                        long: params.long,
+                    };
                 }
             };
 
             // only allow http and https
             if url.scheme() != "https" && url.scheme() != "http" {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    super::shared::ErrorTemplate {
-                        title: "Invalid Long URL".to_string(),
-                        message: "The long URL is invalid.".to_string(),
-                        back_path: format!("/link?long={}", long),
-                    },
-                )
-                    .into_response();
+                return LinkPostResponse::BadRequest {
+                    reason: "Schema (protocol) is not supported.",
+                    long: params.long,
+                };
             }
 
             // validate domains
             let domain = match url.domain() {
                 Some(domain) => domain,
                 None => {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        super::shared::ErrorTemplate {
-                            title: "Invalid Long URL".to_string(),
-                            message: "The long URL is invalid. No domain found.".to_string(),
-                            back_path: format!("/link?long={}", long),
-                        },
-                    )
-                        .into_response();
+                    return LinkPostResponse::BadRequest {
+                        reason: "No domain found.",
+                        long: params.long,
+                    };
                 }
             };
             // ...only allow second level domains or higher
-            if domain.split('.').count() < 2 {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    super::shared::ErrorTemplate {
-                        title: "Invalid Long URL".to_string(),
-                        message: "The long URL is invalid. Bare top level domains are not allowed."
-                            .to_string(),
-                        back_path: format!("/link?long={}", long),
-                    },
-                )
-                    .into_response();
+            if domain.split('.').count() == 1 {
+                return LinkPostResponse::BadRequest {
+                    reason: "Bare top level domains are not allowed.",
+                    long: params.long,
+                };
             }
             // ...only allow domains that are not blocked
             if state.storage.is_domain_blocked(domain).await {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    super::shared::ErrorTemplate {
-                        title: "Invalid Long URL".to_string(),
-                        message: "The long URL is invalid. The domain is blocked.".to_string(),
-                        back_path: format!("/link?long={}", long),
-                    },
-                )
-                    .into_response();
+                return LinkPostResponse::BadRequest {
+                    reason: "The domain is blocked.",
+                    long: params.long,
+                };
             }
 
             // create shortlink
@@ -153,35 +121,72 @@ pub async fn post(
             // store shortlink
             if let Err(err) = state.storage.add_shortlink(&shortlink).await {
                 tracing::error!("Failed to store shortlink for long url {}: {}", long, err);
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    super::shared::ErrorTemplate {
-                        title: "Failed to store shortlink".to_string(),
-                        message: format!(
-                            "Failed to store shortlink for long url '{}'. Please try again later.",
-                            long
-                        ),
-                        back_path: format!("/link?long={}", long),
-                    },
-                )
-                    .into_response();
+                return LinkPostResponse::Exception {
+                    reason: "Failed to store shortlink",
+                    long: params.long,
+                };
             };
 
-            return PostOkTemplate {
+            return LinkPostResponse::Ok {
                 email,
                 long: shortlink.long_url().to_string(),
                 short: shortlink.short_url(),
-            }
-            .into_response();
+            };
         }
     }
-    (
-        StatusCode::FORBIDDEN,
-        super::shared::ErrorTemplate {
-            title: "action forbidden".to_string(),
-            message: "You are not authorized for creating shortlinks.".to_string(),
-            back_path: "/".to_string(),
-        },
-    )
-        .into_response()
+    LinkPostResponse::Forbidden
+}
+
+enum LinkPostResponse {
+    BadRequest {
+        reason: &'static str,
+        long: String,
+    },
+    Forbidden,
+    Exception {
+        reason: &'static str,
+        long: String,
+    },
+    Ok {
+        email: String,
+        long: String,
+        short: String,
+    },
+}
+
+impl IntoResponse for LinkPostResponse {
+    fn into_response(self) -> Response {
+        match self {
+            LinkPostResponse::BadRequest { reason, long } => (
+                StatusCode::BAD_REQUEST,
+                super::shared::ErrorTemplate {
+                    title: "Invalid Long URL".to_string(),
+                    message: format!("The long URL '{}' is invalid. {}", long, reason,),
+                    back_path: format!("/link?long={}", long),
+                },
+            )
+                .into_response(),
+            LinkPostResponse::Forbidden => (
+                StatusCode::FORBIDDEN,
+                super::shared::ErrorTemplate {
+                    title: "Forbidden".to_string(),
+                    message: "You are not authorized for creating shortlinks.".to_string(),
+                    back_path: "/".to_string(),
+                },
+            )
+                .into_response(),
+            LinkPostResponse::Exception { reason, long } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                super::shared::ErrorTemplate {
+                    title: reason.to_string(),
+                    message: format!("{} for '{}'. Please try again later.", reason, long),
+                    back_path: format!("/link?long={}", long),
+                },
+            )
+                .into_response(),
+            LinkPostResponse::Ok { email, long, short } => {
+                PostOkTemplate { email, long, short }.into_response()
+            }
+        }
+    }
 }
