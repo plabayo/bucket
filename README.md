@@ -1,6 +1,6 @@
 # 🪣 bckt.xyz
 
-Link shortener and secret share.
+Link shortener and secret sharing service.
 
 [![MIT License][license-mit-badge]][license-mit-url]
 [![Apache 2.0 License][license-apache-badge]][license-apache-url]
