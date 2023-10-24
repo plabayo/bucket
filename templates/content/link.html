@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 {% include "content/shared/link_nav.html" %}
+<div class="table rows spacious">
+    <div>
+        <p>
+            Shortlinks are a way to shorten long URLs.
+            On this page you can create a shortlink or manage your existing ones.
+            Shortlinks can be used by anyone, and require no authentication.
+        </p>
+    </div>
+</div>
 <div class="box" style="width: 100%">
     <strong class="block titlebar">🔗 New Shortlink</strong>
     <form action="/link" method="post" style="margin: 10px 0 0 0; padding: 10px;">

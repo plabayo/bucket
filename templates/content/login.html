@@ -1,5 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="table rows spacious">
+    <div>
+        <p>
+            bckt.xyz is a URL shortener and secret sharing service.
+            Shortlinks and secrets can be shared with anyone, and require no login to this platform.
+            However, in order to create shortlinks or secrets, you must login using a magic link below.
+        </p>
+    </div>
+    <div>
+        <p>
+            Magic links are sent to your email address, and are valid for 1 hour.
+            Once used they log you in for up to 1 week and allow you to create shortlinks and secrets.
+        </p>
+    </div>
+</div>
 <div class="box" style="width: 100%">
     <strong class="block titlebar">⎆login using a magic link</strong>
     <form action="/login" method="post" style="margin: 10px 0 0 0; padding: 10px;">
@@ -23,5 +38,12 @@
             <input class="button good big" type="submit" value="send magic link" style="float: right;">
         </p>
     </form>
+</div>
+<div class="box info">
+    <strong class="block titlebar">🔒 Private Platform</strong>
+    <p>
+        Only authorized email addreses can login using magic links.
+        This is a privelage reserved for friends of <a href="/author" hx-boost="false">Plabayo</a>.
+    </p>
 </div>
 {% endblock %}
