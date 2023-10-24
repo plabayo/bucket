@@ -35,3 +35,6 @@ deploy name="bucket": qa
 
 watch name="bucket":
     cargo watch -x 'shuttle run --name {{name}}' -i 'Cargo.lock'
+
+restart name="bucket":
+    cargo shuttle project restart --name {{name}}
