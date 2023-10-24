@@ -27,7 +27,7 @@ impl Shortlink {
         &self.id
     }
 
-    pub fn short_url(&self) -> String {
-        format!("/{}", self.id,)
+    pub fn short_url(&self, scheme: &str, host: &str) -> String {
+        format!("{}://{}/{}", scheme, host, self.id,)
     }
 }

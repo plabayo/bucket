@@ -2,7 +2,12 @@ use std::sync::Arc;
 
 use askama::Template;
 use askama_axum::{IntoResponse, Response};
-use axum::{extract::State, http::StatusCode, response::Redirect, Form};
+use axum::{
+    extract::{Host, State},
+    http::StatusCode,
+    response::Redirect,
+    Form,
+};
 use serde::Deserialize;
 use tower_cookies::Cookies;
 
@@ -53,6 +58,7 @@ pub struct PostParams {
 pub async fn post(
     State(state): State<Arc<crate::router::State>>,
     cookies: Cookies,
+    Host(host): Host,
     Form(params): Form<PostParams>,
 ) -> impl IntoResponse {
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
@@ -130,7 +136,14 @@ pub async fn post(
             return LinkPostResponse::Ok {
                 email,
                 long: shortlink.long_url().to_string(),
-                short: shortlink.short_url(),
+                short: shortlink.short_url(
+                    if host.to_lowercase().contains("bckt.xyz") {
+                        "https"
+                    } else {
+                        "http"
+                    },
+                    &host,
+                ),
             };
         }
     }
