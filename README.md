@@ -51,10 +51,6 @@ This project is not yet finished. Use at your own risk.
 
 Developer todos:
 
-- split auth:
-  - create magic module: MagicIdentity, MagicSender
-    - also store email as lower in MagicIdentity
-  - provide proper Identity in data.rs: basically a hash from email, this is also used by MagicIdentity
 - create secret logic (dirty)
 - list created links by user
 - allow created links by user to be delete

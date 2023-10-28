@@ -13,6 +13,7 @@ askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.3"
 axum = "0.6"
 base64 = "0.21"
+base64-serde = "0.7"
 chrono = "0.4"
 nanoid = "0.4"
 orion = "0.17"
