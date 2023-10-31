@@ -32,6 +32,7 @@ impl std::error::Error for MagicError {}
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MagicIdentity {
     email: String,
+    email_hash: String,
     #[serde(with = "Base64Standard")]
     token: Vec<u8>,
     expires_at: u64,
@@ -41,6 +42,11 @@ pub struct MagicIdentity {
 impl MagicIdentity {
     pub fn new(email: &str) -> Result<Self, String> {
         let email = email.to_lowercase();
+        let email_hash = hex::encode(
+            hash::digest(email.as_bytes())
+                .expect("hashing email")
+                .as_ref(),
+        );
         let mut token = [0u8; 16];
         orion::util::secure_rand_bytes(&mut token).map_err(|e| e.to_string())?;
         let expires_at = chrono::Utc::now()
@@ -49,6 +55,7 @@ impl MagicIdentity {
             .timestamp() as u64;
         Ok(Self {
             email,
+            email_hash,
             token: token.to_vec(),
             expires_at,
             verified: false,
@@ -76,6 +83,10 @@ impl MagicIdentity {
 
     pub fn email(&self) -> &str {
         &self.email
+    }
+
+    pub fn email_hash(&self) -> &str {
+        &self.email_hash
     }
 
     pub fn verified(&self) -> bool {

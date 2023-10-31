@@ -18,17 +18,9 @@
                 <label for="long">long link:</label>
             </p>
             <p>
-                <input
-                    id="long" name="long"
-                    type="long" placeholder="long"
-                    style="width: 100%; margin: auto; vertical-align: middle;"
-                    {% match long %}
-                    {% when Some with (val) %}
-                        value="{{ val }}"
-                    {% when None %}
-                    {% endmatch %}
-                    autofocus
-                >
+                <input id="long" name="long" type="long" placeholder="long"
+                    style="width: 100%; margin: auto; vertical-align: middle;" {% match long %} {% when Some with (val)
+                    %} value="{{ val }}" {% when None %} {% endmatch %} autofocus>
             </p>
         </div>
         <p>
@@ -36,4 +28,38 @@
         </p>
     </form>
 </div>
+{% if shortlinks.len() > 0 %}
+<div>
+    <h3>Previously created shortlinks:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>short</th>
+                <th>long</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shortlink in shortlinks %}
+            <tr>
+                <td>
+                    {% let short = shortlink.link_short(scheme, host) %}
+                    <a href="{{ short }}" hx-boost="false">{{ short }}</a>
+                </td>
+                <td>
+                    <a href="{{ shortlink.link_long() }}">{{ shortlink.link_long() }}</a>
+                </td>
+                <td>
+                    <form action="/link" method="post">
+                        <input type="hidden" name="short" value="{{ shortlink.link_hash() }}">
+                        <p>
+                            <input class="button bad big" type="submit" value="🗑️ Delete">
+                        </p>
+                    </form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}

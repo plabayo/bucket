@@ -29,8 +29,11 @@ pub async fn get(
     Query(query): Query<GetQuery>,
 ) -> Response {
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
-        if let Some(email) = state.auth.verify_cookie(cookie.value()) {
-            return GetTemplate { email }.into_response();
+        if let Some(identity) = state.auth.verify_cookie(cookie.value()) {
+            return GetTemplate {
+                email: identity.email().to_owned(),
+            }
+            .into_response();
         }
     }
     IndexLoginTemplate { email: query.email }.into_response()

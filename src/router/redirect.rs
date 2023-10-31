@@ -20,7 +20,7 @@ pub async fn get(
         .into_response(),
         hash => {
             if let Some(link) = state.storage.get_shortlink(hash).await {
-                Redirect::temporary(link.long_url()).into_response()
+                Redirect::temporary(link.link_long()).into_response()
             } else {
                 (StatusCode::NOT_FOUND, crate::router::shared::ErrorTemplate {
                     title: "Not Found".to_string(),

@@ -1,6 +1,8 @@
 use axum::http::StatusCode;
 use orion::aead::SecretKey;
 
+use self::magic::MagicIdentity;
+
 pub const COOKIE_NAME: &str = "bckt-auth";
 
 mod email;
@@ -55,7 +57,7 @@ impl Auth {
         Some((magic, expires_at))
     }
 
-    pub fn verify_cookie(&self, magic: impl AsRef<str>) -> Option<String> {
+    pub fn verify_cookie(&self, magic: impl AsRef<str>) -> Option<MagicIdentity> {
         let identity = match magic::MagicIdentity::decrypt(magic, &self.secret_key) {
             Ok(identity) => identity,
             Err(e) => {
@@ -73,6 +75,6 @@ impl Auth {
             return None;
         }
 
-        Some(identity.email().to_owned())
+        Some(identity)
     }
 }

@@ -52,10 +52,7 @@ This project is not yet finished. Use at your own risk.
 Developer todos:
 
 - create secret logic (dirty)
-- list created links by user
-- allow created links by user to be delete
 - allow secrets to be deleted
-- switch storage for real storage
 - import blocklists for all kind of nasty domains which we want to avoid
 - add l18n support using `i18n-embed-fl` and `accept-language` crates (for now only english, dutch and spanish support);
 - add support for all known languages possible;

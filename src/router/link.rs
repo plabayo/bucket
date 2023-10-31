@@ -18,6 +18,9 @@ use crate::data::Shortlink;
 pub struct GetTemplate {
     pub email: String,
     pub long: Option<String>,
+    pub shortlinks: Vec<Shortlink>,
+    pub scheme: String,
+    pub host: String,
 }
 
 #[derive(Deserialize)]
@@ -27,14 +30,27 @@ pub struct GetParams {
 
 pub async fn get(
     State(state): State<Arc<crate::router::State>>,
+    Host(host): Host,
     cookies: Cookies,
     Form(params): Form<GetParams>,
 ) -> Response {
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
-        if let Some(email) = state.auth.verify_cookie(cookie.value()) {
+        if let Some(identity) = state.auth.verify_cookie(cookie.value()) {
+            let shortlinks = state
+                .storage
+                .get_shortlinks_for_owner(identity.email_hash())
+                .await;
             return GetTemplate {
-                email,
+                email: identity.email().to_owned(),
                 long: params.long,
+                shortlinks,
+                scheme: if host.to_lowercase().contains("bckt.xyz") {
+                    "https"
+                } else {
+                    "http"
+                }
+                .to_owned(),
+                host: host.to_owned(),
             }
             .into_response();
         }
@@ -52,7 +68,8 @@ pub struct PostOkTemplate {
 
 #[derive(Deserialize)]
 pub struct PostParams {
-    long: String,
+    long: Option<String>,
+    short: Option<String>,
 }
 
 pub async fn post(
@@ -62,19 +79,39 @@ pub async fn post(
     Form(params): Form<PostParams>,
 ) -> impl IntoResponse {
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
-        if let Some(email) = state.auth.verify_cookie(cookie.value()) {
-            if params.long.is_empty() {
+        if let Some(identity) = state.auth.verify_cookie(cookie.value()) {
+            if let Some(short) = params.short {
+                return LinkPostResponse::Other(match state.storage.delete_shortlink(&short).await {
+                    Ok(_) => {
+                        crate::router::shared::InfoTemplate {
+                            title: "Shortlink Deleted".to_string(),
+                            message: format!("The shortlink '{}' has been deleted.", short),
+                            back_path: "/link".to_string(),
+                        }.into_response()
+                    }
+                    Err(err) => {
+                        crate::router::shared::ErrorTemplate {
+                            title: "Failed to Delete Shortlink".to_string(),
+                            message: format!("The shortlink '{}' could not be deleted. {}. Please try again later.", short, err),
+                            back_path: "/link".to_string(),
+                        }.into_response()
+                    }
+                });
+            }
+
+            let long = params.long.unwrap_or_default();
+            if long.is_empty() {
                 return LinkPostResponse::BadRequest {
                     reason: "URL is not specified.",
-                    long: params.long,
+                    long,
                 };
             }
 
             // default to https
-            let long: String = if params.long.contains("://") {
-                params.long.clone()
+            let long: String = if long.contains("://") {
+                long.clone()
             } else {
-                format!("https://{}", params.long)
+                format!("https://{}", long)
             };
 
             // validate url
@@ -83,7 +120,7 @@ pub async fn post(
                 Err(_) => {
                     return LinkPostResponse::BadRequest {
                         reason: "URL is invalid.",
-                        long: params.long,
+                        long,
                     };
                 }
             };
@@ -92,7 +129,7 @@ pub async fn post(
             if url.scheme() != "https" && url.scheme() != "http" {
                 return LinkPostResponse::BadRequest {
                     reason: "Schema (protocol) is not supported.",
-                    long: params.long,
+                    long,
                 };
             }
 
@@ -102,7 +139,7 @@ pub async fn post(
                 None => {
                     return LinkPostResponse::BadRequest {
                         reason: "No domain found.",
-                        long: params.long,
+                        long,
                     };
                 }
             };
@@ -110,33 +147,38 @@ pub async fn post(
             if domain.split('.').count() == 1 {
                 return LinkPostResponse::BadRequest {
                     reason: "Bare top level domains are not allowed.",
-                    long: params.long,
+                    long,
                 };
             }
             // ...only allow domains that are not blocked
             if state.storage.is_domain_blocked(domain).await {
                 return LinkPostResponse::BadRequest {
                     reason: "The domain is blocked.",
-                    long: params.long,
+                    long,
                 };
             }
 
             // create shortlink
-            let shortlink = Shortlink::new(url.to_string(), email.clone());
+            let shortlink = Shortlink::new(url.to_string(), identity.email_hash().to_owned());
 
             // store shortlink
             if let Err(err) = state.storage.add_shortlink(&shortlink).await {
-                tracing::error!("Failed to store shortlink for long url {}: {}", long, err);
+                tracing::error!(
+                    "Failed to store shortlink for long url {} by {}: {}",
+                    shortlink.owner_email(),
+                    shortlink.link_long(),
+                    err
+                );
                 return LinkPostResponse::Exception {
                     reason: "Failed to store shortlink",
-                    long: params.long,
+                    long,
                 };
             };
 
             return LinkPostResponse::Ok {
-                email,
-                long: shortlink.long_url().to_string(),
-                short: shortlink.short_url(
+                email: identity.email().to_owned(),
+                long: shortlink.link_long().to_string(),
+                short: shortlink.link_short(
                     if host.to_lowercase().contains("bckt.xyz") {
                         "https"
                     } else {
@@ -165,6 +207,7 @@ enum LinkPostResponse {
         long: String,
         short: String,
     },
+    Other(Response),
 }
 
 impl IntoResponse for LinkPostResponse {
@@ -204,6 +247,7 @@ impl IntoResponse for LinkPostResponse {
             LinkPostResponse::Ok { email, long, short } => {
                 PostOkTemplate { email, long, short }.into_response()
             }
+            LinkPostResponse::Other(response) => response,
         }
     }
 }
