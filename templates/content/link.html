@@ -40,14 +40,16 @@
             <span> → <a href="{{ shortlink.link_long() }}">{{ shortlink.link_long() }}</a></span>
         </div>
         <section class="tool-bar">
-            <button _="on click navigator.clipboard.writeText('{{ short }}')" class="big" title="copy shortlink">
-                📋
-            </button>
             <form action="/link" method="post">
                 <input type="hidden" name="value" value="{{ shortlink.link_hash() }}">
                 <input type="hidden" name="action" value="delete">
                 <input class="button bad big" type="submit" value="🗑️" title="delete shortlink">
             </form>
+            <button _="on load show with visibility
+                        on click navigator.clipboard.writeText('{{ short }}')"
+                class="big" title="copy shortlink" style="visibility: hidden;">
+                📋
+            </button>
         </section>
     </div>
     {% endfor %}

@@ -9,9 +9,10 @@
     </p>
     <section class="tool-bar" style="float: right;">
         <button
-            _="on click navigator.clipboard.writeText('{{ short }}')"
+            _="on load show with visibility
+                on click navigator.clipboard.writeText('{{ short }}')"
             class="big"
-            autofocus
+            style="visibility: hidden;"
         >
             📋 Copy Shortlink To Clipboard
         </button>
