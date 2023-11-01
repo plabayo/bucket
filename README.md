@@ -61,9 +61,7 @@ Developer todos:
 - provide API, using same security mechanism
 - provide bckt cli tool that over API can communicate with it (config in `~/.bckt.toml`)
 - make storage backend swappable with other stuff
-- provide also file storage upload using blob storage as bcakend
-- move bckt specific stuff (e.g. name) to metadata in cargo.toml
-- make bucket logic into a lib and have just a thin layer specific to our domain in a new crate called "bckt-xyz"
+- provide also file storage upload using blob storage as backend
 
 ## Contributing
 
