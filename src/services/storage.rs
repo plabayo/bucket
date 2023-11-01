@@ -46,12 +46,17 @@ impl Storage {
     }
 
     pub async fn delete_shortlink(&self, id: &str, owner_email: &str) -> Result<(), String> {
-        sqlx::query("DELETE FROM bckt_links WHERE owner_email = $1 AND link_hash = $2")
+        let len = sqlx::query("DELETE FROM bckt_links WHERE owner_email = $1 AND link_hash = $2")
             .bind(owner_email)
             .bind(id)
             .execute(&self.pool)
             .await
             .map_err(|e| e.to_string())
-            .map(|_| ())
+            .map(|result| result.rows_affected())?;
+        if len == 0 {
+            Err(format!("no shortlink '{id}' exists for current owner"))
+        } else {
+            Ok(())
+        }
     }
 }
