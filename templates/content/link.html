@@ -17,6 +17,7 @@
             <p>
                 <label for="long">long link:</label>
             </p>
+            <input type="hidden" name="action" value="create">
             <p>
                 <input id="long" name="long" type="long" placeholder="long"
                     style="width: 100%; margin: auto; vertical-align: middle;" {% match long %} {% when Some with (val)
@@ -45,7 +46,7 @@
             <tr>
                 {% let short = shortlink.link_short(scheme, host) %}
                 <td>
-                    <a href="{{ short }}" hx-boost="false">{{ short }}</a>
+                    <a href="/{{ shortlink.link_hash() }}" hx-boost="false">{{ short }}</a>
                 </td>
                 <td>
                     <a href="{{ shortlink.link_long() }}">{{ shortlink.link_long() }}</a>
@@ -61,6 +62,7 @@
                 <td>
                     <form action="/link" method="post">
                         <input type="hidden" name="short" value="{{ shortlink.link_hash() }}">
+                        <input type="hidden" name="action" value="delete">
                         <input class="button bad big" type="submit" value="🗑️&nbsp;Delete">
                     </form>
             </tr>

@@ -45,8 +45,9 @@ impl Storage {
             .unwrap_or_default()
     }
 
-    pub async fn delete_shortlink(&self, id: &str) -> Result<(), String> {
-        sqlx::query("DELETE FROM bckt_links WHERE link_hash = $1")
+    pub async fn delete_shortlink(&self, id: &str, owner_email: &str) -> Result<(), String> {
+        sqlx::query("DELETE FROM bckt_links WHERE owner_email = $1 AND link_hash = $2")
+            .bind(owner_email)
             .bind(id)
             .execute(&self.pool)
             .await

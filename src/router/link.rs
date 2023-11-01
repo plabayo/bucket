@@ -64,6 +64,7 @@ pub struct PostOkTemplate {
     pub email: String,
     pub long: String,
     pub short: String,
+    pub hash: String,
 }
 
 #[derive(Deserialize)]
@@ -81,7 +82,7 @@ pub async fn post(
     if let Some(cookie) = cookies.get(crate::services::COOKIE_NAME) {
         if let Some(identity) = state.auth.verify_cookie(cookie.value()) {
             if let Some(short) = params.short {
-                return LinkPostResponse::Other(match state.storage.delete_shortlink(&short).await {
+                return LinkPostResponse::Other(match state.storage.delete_shortlink(&short, identity.email_hash()).await {
                     Ok(_) => {
                         crate::router::shared::InfoTemplate {
                             title: "Shortlink Deleted".to_string(),
@@ -186,6 +187,7 @@ pub async fn post(
                     },
                     &host,
                 ),
+                hash: shortlink.link_hash().to_owned(),
             };
         }
     }
@@ -206,6 +208,7 @@ enum LinkPostResponse {
         email: String,
         long: String,
         short: String,
+        hash: String,
     },
     Other(Response),
 }
@@ -244,9 +247,18 @@ impl IntoResponse for LinkPostResponse {
                 },
             )
                 .into_response(),
-            LinkPostResponse::Ok { email, long, short } => {
-                PostOkTemplate { email, long, short }.into_response()
+            LinkPostResponse::Ok {
+                email,
+                long,
+                short,
+                hash,
+            } => PostOkTemplate {
+                email,
+                long,
+                short,
+                hash,
             }
+            .into_response(),
             LinkPostResponse::Other(response) => response,
         }
     }
