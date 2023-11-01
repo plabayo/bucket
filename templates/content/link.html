@@ -46,7 +46,10 @@
                 <input class="button bad big" type="submit" value="🗑️" title="delete shortlink">
             </form>
             <button _="on load show with visibility
-                        on click navigator.clipboard.writeText('{{ short }}')"
+                        on click js
+                            navigator.clipboard.writeText('{{ short }}')
+                            && (new Notyf()).success('Copied {{ short }} to your clipboard')
+                        end"
                 class="big" title="copy shortlink" style="visibility: hidden;">
                 📋
             </button>

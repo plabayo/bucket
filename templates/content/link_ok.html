@@ -10,7 +10,10 @@
     <section class="tool-bar" style="float: right;">
         <button
             _="on load show with visibility
-                on click navigator.clipboard.writeText('{{ short }}')"
+                on click js
+                    navigator.clipboard.writeText('{{ short }}')
+                    && (new Notyf()).success('Copied {{ short }} to your clipboard')
+                end"
             class="big"
             style="visibility: hidden;"
         >
