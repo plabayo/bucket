@@ -34,7 +34,7 @@
     <h3>Previously created shortlinks:</h3>
     {% for shortlink in shortlinks %}
     {% let short = shortlink.link_short(scheme, host) %}
-    <div class="box f-row">
+    <div class="box f-switch">
         <div>
             <span>🔗 <a href="/{{ shortlink.link_hash() }}" hx-boost="false">{{ short }}</a></span>
             <span> → <a href="{{ shortlink.link_long() }}">{{ shortlink.link_long() }}</a></span>
