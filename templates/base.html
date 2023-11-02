@@ -24,8 +24,9 @@
 
     <script src="/static/js/htmx.min.js?v=1.9.6"></script>
     <script src="/static/js/hyperscript.min.js?v=0.9.11"></script>
-    <script type="module" src="/static/js/bckt.js?v=0.1.0"></script>
     <script src="/static/js/notyf.min.js?v=3"></script>
+
+    <script src='/static/js/bckt.js?v=0.2.0'></script>
 
     <link rel="stylesheet" href="/static/css/notyf.min.css?v=3">
     <link rel="stylesheet" href="/static/css/missing.min.css?v=1.1.1" />
@@ -46,7 +47,8 @@
             </p>
         </header>
 
-        <div id="content" class="center" style="padding: 5px" hx-boost="true">
+        <div id="content" class="center" style="padding: 5px"
+            hx-boost="true" hx-target="#content" hx-select="#content" hx-swap="outerHTML">
             {% block content %}{% endblock %}
         </div>
     </main>

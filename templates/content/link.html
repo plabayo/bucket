@@ -51,7 +51,7 @@
             <button _="on load show with visibility
                         on click js
                             navigator.clipboard.writeText('{{ short }}')
-                            && (new Notyf()).success('Copied {{ short }} to your clipboard')
+                            && window.bckt.notify('Copied {{ short }} to your clipboard')
                         end"
                 class="big" title="copy shortlink" style="visibility: hidden;">
                 📋
