@@ -48,14 +48,16 @@
                 <input type="hidden" name="action" value="delete">
                 <input class="button bad big" type="submit" value="🗑️ delete" title="delete shortlink">
             </form>
-            <button _="on load show with visibility
-                        on click js
-                            navigator.clipboard.writeText('{{ short }}')
-                            && window.bckt.notify('Copied {{ short }} to your clipboard!')
-                        end"
-                class="big" title="copy shortlink" style="visibility: hidden;">
-                📋 copy
-            </button>
+            <div>
+                <button _="on load show with visibility
+                            on click js
+                                navigator.clipboard.writeText('{{ short }}')
+                                && window.bckt.notify('Copied {{ short }} to your clipboard!')
+                            end"
+                    class="big" title="copy shortlink" style="visibility: hidden;">
+                    📋 copy
+                </button>
+            </div>
         </section>
     </div>
     {% endfor %}
