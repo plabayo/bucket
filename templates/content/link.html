@@ -42,19 +42,19 @@
         <section class="tool-bar">
             <form
                 action="/link" method="post"
-                hx-confirm="Are you sure you wish to delete the shortlink {{ short }} for the long link {{ shortlink.link_long() }}?"
+                hx-confirm="Are you sure you wish to delete the shortlink {{ short }}?"
             >
                 <input type="hidden" name="value" value="{{ shortlink.link_hash() }}">
                 <input type="hidden" name="action" value="delete">
-                <input class="button bad big" type="submit" value="🗑️" title="delete shortlink">
+                <input class="button bad big" type="submit" value="🗑️ delete" title="delete shortlink">
             </form>
             <button _="on load show with visibility
                         on click js
                             navigator.clipboard.writeText('{{ short }}')
-                            && window.bckt.notify('Copied {{ short }} to your clipboard')
+                            && window.bckt.notify('Copied {{ short }} to your clipboard!')
                         end"
                 class="big" title="copy shortlink" style="visibility: hidden;">
-                📋
+                📋 copy
             </button>
         </section>
     </div>

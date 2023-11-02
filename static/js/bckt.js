@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     class Bucket {
         constructor() {
-            this._notify = new Notyf();
+            this._notify = new Notyf({
+                dismissible: true,
+                duration: 5000,
+            });
         }
 
         notify(message) {

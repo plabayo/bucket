@@ -2,9 +2,9 @@
 {% block content %}
 <div class="box bad" style="width: 100%">
     <strong class="block titlebar" style="color: var(--custom-error-text); text-shadow: none;">⚠ {{ title }}</strong>
-    <p style="color: var(--bg);">{{ message }}</p>
+    <p>{{ message }}</p>
     <p>
-        <a href="{{ back_path }}" class="<button> big" style="margin: 10px 0 0 0; float: right;" autofocus>↩ go back</a>
+        <a href="{{ back_path }}" class="<button> ok big" style="margin: 10px 0 0 0; float: right;" autofocus>↩ go back</a>
     </p>
 </div>
 {% endblock %}

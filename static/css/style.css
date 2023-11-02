@@ -23,12 +23,12 @@ button:hover, .\<button\>:hover, input[type=submit]:hover {
 
 /* Light Mode */
 :root {
-    --bg: #F1FAEE;
+    --bg: rgb(230, 245, 255);
     --fg: #1D3557;
     --muted-fg: #457B9D;
     --faded-fg: #A8DADC;
     --graphical-fg: #1D3557;
-    --box-bg: #F1FAEE;
+    --box-bg: #eef8fa;
     --interactive-bg: #A8DADC;
     --accent: #1D3557;
     --muted-accent: #457B9D;
@@ -43,10 +43,10 @@ button:hover, .\<button\>:hover, input[type=submit]:hover {
     --ok-graphical-fg: #2A9D8F;
     --bad-graphical-fg: #c6535c;
     --warn-graphical-fg: #E76F51;
-    --plain-bg: #F1FAEE;
+    --plain-bg: #eefafa;
     --info-bg: #A8DADC;
     --ok-bg: #2A9D8F;
-    --bad-bg: #eb6974;
+    --bad-bg: #ee818a;
     --warn-bg: #E76F51;
 }
 
@@ -76,7 +76,22 @@ button:hover, .\<button\>:hover, input[type=submit]:hover {
         --plain-bg: #1D3557;
         --info-bg: #457B9D;
         --ok-bg: #2A9D8F;
-        --bad-bg: #f7c1c5;
+        --bad-bg: #800009;
         --warn-bg: #E76F51;
     }
+}
+
+a.ok, button.ok, input.ok {
+    background-color: var(--ok-bg);
+    color: var(--fg);
+}
+
+a.bad, button.bad, input.bad {
+    background-color: var(--bad-bg);
+    color: var(--fg);
+}
+
+a.warn, button.warn, input.warn {
+    background-color: var(--warn-bg);
+    color: var(--fg);
 }
