@@ -2351,27 +2351,6 @@ dependencies = [
 
 [[package]]
 name = "shuttle-common"
-version = "0.30.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e47b17dc8e970053a38dbc24a2c507682a6cd1a6ec04d80799ceaf49ffd95b46"
-dependencies = [
- "anyhow",
- "chrono",
- "comfy-table",
- "crossterm 0.27.0",
- "once_cell",
- "rustrict",
- "semver",
- "serde",
- "serde_json",
- "strum",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "shuttle-common"
 version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "03089b45ff42d977b5c3df0ee8cf6cb147f8df65bc4c8068405a129e06380e46"
@@ -2427,7 +2406,7 @@ dependencies = [
  "prost",
  "prost-types",
  "serde_json",
- "shuttle-common 0.31.0",
+ "shuttle-common",
  "tokio",
  "tonic",
  "tower",
@@ -2448,9 +2427,9 @@ dependencies = [
  "serde",
  "serde_json",
  "shuttle-codegen",
- "shuttle-common 0.31.0",
+ "shuttle-common",
  "shuttle-proto",
- "shuttle-service 0.31.0",
+ "shuttle-service",
  "strfmt",
  "thiserror",
  "tokio",
@@ -2469,21 +2448,7 @@ dependencies = [
  "async-trait",
  "secrecy",
  "serde",
- "shuttle-service 0.31.0",
-]
-
-[[package]]
-name = "shuttle-service"
-version = "0.30.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63f9f1fe4eae29feefce7c3775a10e0a7d0f62dc799741cc667b8e19306aedb5"
-dependencies = [
- "anyhow",
- "async-trait",
- "serde",
- "shuttle-common 0.30.1",
- "strfmt",
- "thiserror",
+ "shuttle-service",
 ]
 
 [[package]]
@@ -2495,20 +2460,20 @@ dependencies = [
  "anyhow",
  "async-trait",
  "serde",
- "shuttle-common 0.31.0",
+ "shuttle-common",
  "strfmt",
  "thiserror",
 ]
 
 [[package]]
 name = "shuttle-shared-db"
-version = "0.30.1"
+version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bc0a0a78a7b78e38ac6cef61c69ff187aab5a792ebb4c338d22e4b6338b9241"
+checksum = "4660cb5ef4cc27fa1a5c12e9e7cd827aae613932e774a72b442f9175c837cd45"
 dependencies = [
  "async-trait",
  "serde",
- "shuttle-service 0.30.1",
+ "shuttle-service",
  "sqlx",
 ]
 
